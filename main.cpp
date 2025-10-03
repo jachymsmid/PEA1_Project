@@ -12,7 +12,16 @@ struct Point
 
 
 // impose initial conditions
-void initial_conditions(){}
+void initial_conditions(std::vector<std::vector<double>> &U, std::vector<std::vector<Point>> &Mesh, int N_x, int N_y)
+{
+  for (int i = 0; i < N_x; i++)
+  {
+    for (int j = 0; j < N_y; j++)
+    {
+      U[i][j] = 100*exp((-pow(Mesh[i][j].x+1,2.0)+pow(Mesh[i][j].y,2.0))/0.01);
+    }
+  }
+}
 
 // impose boundary conditions
 void boundary_conditions(){}
@@ -41,7 +50,19 @@ void print_mesh(int N_x, int N_y, std::vector<std::vector<Point>> &Mesh)
     {
       std::cout << "(" << Mesh[i][j].x << ", " << Mesh[i][j].y << ") ";
     }
-    std::cout << "\n";
+    std::cout << std::endl;
+  }
+}
+
+void print_field(std::vector<std::vector<double>> &U, int N_x, int N_y)
+{
+  for (int i = 0; i < N_x; i++)
+  {
+    for (int j = 0; j < N_y; j++)
+    {
+      std::cout << U[i][j] << " ";
+    }
+    std::cout << std::endl;
   }
 }
 
@@ -53,16 +74,21 @@ void lax_friedrichs(){}
 void lax_wendorf(){}
 void upwind(){}
 
-int main(){
+int main()
+{
   // domain definition
-  const double x_min = 0, x_max = 2, y_min = 0, y_max = 3;
+  const double x_min = 0, x_max = 2, y_min = 0, y_max = 2;
   // number of grid points in the x, y direction respectively
-  const int N_x = 10, N_y = 10;
+  const int N_x = 5, N_y = 5;
 
   
   std::vector<std::vector<Point>> Mesh (N_x, std::vector<Point>(N_y));
   mesh(N_x, N_y, x_min, x_max, y_min, y_max, Mesh);
-  print_mesh(N_x, N_y, Mesh);
+  //print_mesh(N_x, N_y, Mesh);
+
+  std::vector<std::vector<double>> U(N_x, std::vector<double>(N_y));
+  initial_conditions(U, Mesh, N_x, N_y);
+  print_field(U, N_x, N_y);
 
   return 0;
 }
