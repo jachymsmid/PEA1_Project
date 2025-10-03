@@ -3,6 +3,14 @@
 #include <fstream>
 #include <vector>
 
+
+struct Point
+{
+  double x, y;
+};
+
+
+
 // impose initial conditions
 void initial_conditions(){}
 
@@ -10,7 +18,32 @@ void initial_conditions(){}
 void boundary_conditions(){}
 
 // construct the mesh
-void mesh(){}
+void mesh(int N_x, int N_y, double x_min, double x_max, double y_min, double y_max, std::vector<std::vector<Point>> &Mesh)
+{
+  double dx = (x_max - x_min)/(N_x-1);
+  double dy = (y_max - y_min)/(N_y-1);
+  for (int i = 0; i < N_x; ++i)
+  {
+    for (int j = 0; j < N_y; ++j)
+    {
+        Mesh[i][j].x = x_min + i * dx;
+        Mesh[i][j].y = y_min + j * dy;
+    }
+  }
+}
+
+// print mesh for troubleshooting reasons
+void print_mesh(int N_x, int N_y, std::vector<std::vector<Point>> &Mesh)
+{
+  for (int i = 0; i < N_x; ++i)
+  {
+    for (int j = 0; j < N_y; ++j)
+    {
+      std::cout << "(" << Mesh[i][j].x << ", " << Mesh[i][j].y << ") ";
+    }
+    std::cout << "\n";
+  }
+}
 
 // write the data to a file
 void write_data(){}
@@ -21,5 +54,15 @@ void lax_wendorf(){}
 void upwind(){}
 
 int main(){
+  // domain definition
+  const double x_min = 0, x_max = 2, y_min = 0, y_max = 3;
+  // number of grid points in the x, y direction respectively
+  const int N_x = 10, N_y = 10;
+
+  
+  std::vector<std::vector<Point>> Mesh (N_x, std::vector<Point>(N_y));
+  mesh(N_x, N_y, x_min, x_max, y_min, y_max, Mesh);
+  print_mesh(N_x, N_y, Mesh);
+
   return 0;
 }
