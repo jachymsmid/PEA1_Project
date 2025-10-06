@@ -3,7 +3,7 @@
 #include <fstream>
 #include <vector>
 
-
+// point in 2D Cartesian coordinates
 struct Point
 {
   double x, y;
@@ -24,7 +24,19 @@ void initial_conditions(std::vector<std::vector<double>> &U, std::vector<std::ve
 }
 
 // impose boundary conditions
-void boundary_conditions(){}
+void boundary_conditions(std::vector<std::vector<double>> &U, int N_x, int N_y)
+{
+  for (int i = 0; i < N_x; i++)
+  {
+    U[i][0] = 0.0;
+    U[i][-1] = 0.0;
+  }
+  for (int j = 0; j <N_y; j++)
+  {
+    U[0][j] = 0.0;
+    U[-1][j] = 0.0;
+  }
+}
 
 // construct the mesh
 void mesh(int N_x, int N_y, double x_min, double x_max, double y_min, double y_max, std::vector<std::vector<Point>> &Mesh)
