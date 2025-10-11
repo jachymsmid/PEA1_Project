@@ -36,7 +36,7 @@ void boundary_conditions(std::vector<std::vector<RealNumber>> &U)
     {
       if (i == 0 || i == U.size() - 1 || j == 0 || j == U[i].size() - 1)
       {
-        U[i][j] = 2; // example modification
+        U[i][j] = 0; 
       }
     }
   }
@@ -139,7 +139,7 @@ int main()
 
   mesh(dx, dy, x_min, y_min, Mesh);
   initial_conditions(U, Mesh);
-  write_data(U, "t_0.dat");
+  write_data(U, "sim/t_0.dat");
   RealNumber dt = cfl_lax_wendroff(dx, dy);
 
   // main loop
