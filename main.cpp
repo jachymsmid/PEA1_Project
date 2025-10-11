@@ -12,11 +12,11 @@ struct Point
 using RealNumber = float;
 
 // impose initial conditions
-void initial_conditions(std::vector<std::vector< RealNumber >> &U, std::vector<std::vector<Point>> &Mesh, int N_x, int N_y)
+void initial_conditions(std::vector<std::vector< RealNumber >> &U, std::vector<std::vector<Point>> &Mesh)
 {
-  for (int i = 0; i < N_x; i++)
+  for (size_t i = 0; i < U.size(); i++)
   {
-    for (int j = 0; j < N_y; j++)
+    for (size_t j = 0; j < U[i].size(); j++)
     {
       U[i][j] = 100*exp(-(pow(Mesh[i][j].x+1,2.0)+pow(Mesh[i][j].y,2.0))/0.01);
     }
@@ -24,28 +24,26 @@ void initial_conditions(std::vector<std::vector< RealNumber >> &U, std::vector<s
 }
 
 // impose boundary conditions
-void boundary_conditions(std::vector<std::vector<RealNumber>> &U, int N_x, int N_y)
+void boundary_conditions(std::vector<std::vector<RealNumber>> &U)
 {
-  for (int i = 0; i < N_x; i++)
+  for (size_t i = 0; i < U.size(); ++i)
   {
-    U[i][0] = 0.0;
-    U[i][-1] = 0.0;
-  }
-  for (int j = 0; j <N_y; j++)
-  {
-    U[0][j] = 0.0;
-    U[-1][j] = 0.0;
+    for (size_t j = 0; j < U[i].size(); ++j)
+    {
+      if (i == 0 || i == U.size() - 1 || j == 0 || j == U[i].size() - 1)
+      {
+        U[i][j] = 2; // example modification
+      }
+    }
   }
 }
 
 // construct the mesh
-void mesh(int N_x, int N_y, RealNumber x_min, RealNumber x_max, RealNumber y_min, RealNumber y_max, std::vector<std::vector<Point>> &Mesh)
+void mesh(RealNumber dx, RealNumber dy, RealNumber x_min, RealNumber y_min, std::vector<std::vector<Point>> &Mesh)
 {
-  RealNumber dx = (x_max - x_min)/(N_x-1);
-  RealNumber dy = (y_max - y_min)/(N_y-1);
-  for (int i = 0; i < N_x; ++i)
+  for (size_t i = 0; i < Mesh.size(); ++i)
   {
-    for (int j = 0; j < N_y; ++j)
+    for (size_t j = 0; j < Mesh[i].size(); ++j)
     {
         Mesh[i][j].x = x_min + i * dx;
         Mesh[i][j].y = y_min + j * dy;
@@ -54,11 +52,11 @@ void mesh(int N_x, int N_y, RealNumber x_min, RealNumber x_max, RealNumber y_min
 }
 
 // print mesh for troubleshooting reasons
-void print_mesh(int N_x, int N_y, std::vector<std::vector<Point>> &Mesh)
+void print_mesh(std::vector<std::vector<Point>> &Mesh)
 {
-  for (int i = 0; i < N_x; ++i)
+  for (size_t i = 0; i < Mesh.size(); ++i)
   {
-    for (int j = 0; j < N_y; ++j)
+    for (size_t j = 0; j < Mesh[i].size(); ++j)
     {
       std::cout << "(" << Mesh[i][j].x << ", " << Mesh[i][j].y << ") ";
     }
@@ -66,12 +64,11 @@ void print_mesh(int N_x, int N_y, std::vector<std::vector<Point>> &Mesh)
   }
 }
 
-void print_field(std::vector<std::vector<RealNumber>> &U, int N_x, int N_y)
+void print_field(std::vector<std::vector<RealNumber>> &U)
 {
-  
-  for (int i = 0; i < N_x; i++)
+  for (size_t i = 0; i < U.size(); i++)
   {
-    for (int j = 0; j < N_y; j++)
+    for (size_t j = 0; j < U[i].size(); j++)
     {
       std::cout << U[i][j] << " ";
     }
@@ -80,15 +77,15 @@ void print_field(std::vector<std::vector<RealNumber>> &U, int N_x, int N_y)
 }
 
 // write the data to a file
-void write_data(std::vector<std::vector<RealNumber>> &U, int N_x, int N_y, std::string file_name)
+void write_data(std::vector<std::vector<RealNumber>> &U, std::string file_name)
 {
   std::ofstream file;
   file.open(file_name);
   if (file)
   {
-    for (int i = 0; i < N_x; i++)
+    for (size_t i = 0; i < U.size(); i++)
     {
-      for (int j = 0; j < N_y; j++)
+      for (size_t j = 0; j < U[i].size(); j++)
       {
         file << U[i][j] << " "; 
       }
@@ -101,34 +98,53 @@ void write_data(std::vector<std::vector<RealNumber>> &U, int N_x, int N_y, std::
 // numerical schemes
 void lax_friedrichs(){}
 
-void lax_wendroff(std::vector<std::vector<RealNumber>> &U, std::vector<std::vector<Point>> &Mesh, int N_x, int N_y)
+void upwind(){}
+
+void lax_wendroff(std::vector<std::vector<RealNumber>> &U, std::vector<std::vector<Point>> &Mesh)
 {
-  for(int i = 0; i < N_x; i++)
+  for(size_t i = 0; i < U.size()-1; i++)
   {
-    for(int j = 0; j < N_y; j++)
+    for(size_t j = 0; j < U[i].size()-1; j++)
     {
+      U[i][j] = 2*i*j;
     }
   }
-
 }
-void upwind(){}
+
+RealNumber cfl_lax_wendroff(RealNumber dx, RealNumber dy)
+{
+  return 1/(dx*dy);
+}
 
 int main()
 {
   // domain definition
   const RealNumber x_min = -1.5, x_max = 1.5, y_min = -1.5, y_max = 1.5;
   // number of grid points in the x, y direction respectively
-  const int N_x = 100, N_y = 100;
+  const int N_x = 10, N_y = 10;
+  const RealNumber dx = (x_max-x_min)/N_x, dy = (y_max-y_min)/N_y;
+  const int T = 2;
+  RealNumber t = 0.f;
 
-  
+  // initialize the mesh, U and file_name
+  std::vector<std::vector<RealNumber>> U(N_x, std::vector<RealNumber>(N_y)); 
   std::vector<std::vector<Point>> Mesh (N_x, std::vector<Point>(N_y));
-  mesh(N_x, N_y, x_min, x_max, y_min, y_max, Mesh);
-  //print_mesh(N_x, N_y, Mesh);
+  std::string file_name;
 
-  std::vector<std::vector<RealNumber>> U(N_x, std::vector<RealNumber>(N_y));
-  initial_conditions(U, Mesh, N_x, N_y);
-  //print_field(U, N_x, N_y);
-  write_data(U, N_x, N_y, "data.dat");
+  mesh(dx, dy, x_min, y_min, Mesh);
+  initial_conditions(U, Mesh);
+  write_data(U, "t_0.dat");
+  RealNumber dt = cfl_lax_wendroff(dx, dy);
+
+  // main loop
+  while (t < T)
+  {
+    t += dt; 
+    lax_wendroff(U, Mesh);
+    boundary_conditions(U);
+    file_name = "t_%04d.dat", t;
+    write_data(U, file_name);
+  }
 
   return 0;
 }
