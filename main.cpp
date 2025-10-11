@@ -5,7 +5,6 @@
 #include <iomanip>
 #include <sstream>
 
-
 using RealNumber = float;
 
 // point in 2D Cartesian coordinates
@@ -101,24 +100,37 @@ void write_data(std::vector<std::vector<RealNumber>> &U, std::string file_name)
 }
 
 // numerical schemes
-void lax_friedrichs(){}
-
-void upwind(){}
-
-void lax_wendroff(std::vector<std::vector<RealNumber>> &U, std::vector<std::vector<Point>> &Mesh)
+void lax_friedrichs()
 {
-  for(size_t i = 0; i < U.size()-1; i++)
+}
+
+void upwind()
+{
+}
+
+void lax_wendroff(std::vector<std::vector<RealNumber>> &U, std::vector<std::vector<Point>> &Mesh, RealNumber dx, RealNumber dy, RealNumber dt)
+{
+  std::vector<std::vector<RealNumber>> U_n = U;
+  RealNumber lx, ly;
+  lx = dt/dx;
+  for(size_t i = 1; i < U.size()-1; i++)
   {
-    for(size_t j = 0; j < U[i].size()-1; j++)
+    for(size_t j = 1; j < U[i].size()-1; j++)
     {
-      U[i][j] = 2*i*j;
+      ly = 2*Mesh[i][j].x*dt/dy;
+      U[i][j] = U_n[i][j]
+              - lx/2*(U_n[i+1][j] - U_n[i-1][j])
+              - ly/2*(U_n[i][j+1] - U_n[i][j-1])
+              + pow(lx,2.0)/2*(U_n[i+1][j] - 2*U_n[i][j] + U_n[i-1][j])
+              + pow(ly,2.0)/2*(U_n[i][j+1] - 2*U_n[i][j] + U_n[i][j-1])
+              + ly*lx/4*(U_n[i+1][j+1] - U_n[i-1][j+1] - U_n[i+1][j-1] + U_n[i-1][j-1]);
     }
   }
 }
 
 RealNumber cfl_lax_wendroff(RealNumber dx, RealNumber dy)
 {
-  return 1/(dx*dy);
+  return 1.0/(1.0/dx+1.0/2.0*1.5*dy);
 }
 
 int main()
@@ -128,30 +140,29 @@ int main()
   // number of grid points in the x, y direction respectively
   const int N_x = 10, N_y = 10;
   const RealNumber dx = (x_max-x_min)/N_x, dy = (y_max-y_min)/N_y;
-  const int T = 2;
+  const RealNumber T = 2.f;
   RealNumber t = 0.f;
 
   // initialize the mesh, U and file_name
   std::vector<std::vector<RealNumber>> U(N_x, std::vector<RealNumber>(N_y)); 
   std::vector<std::vector<Point>> Mesh (N_x, std::vector<Point>(N_y));
   std::string file_name;
-  std::ostringstream fn;
 
   mesh(dx, dy, x_min, y_min, Mesh);
   initial_conditions(U, Mesh);
-  write_data(U, "sim/t_0.dat");
+  write_data(U, "sim/output_t_0.dat");
   RealNumber dt = cfl_lax_wendroff(dx, dy);
 
   // main loop
-  while (t < T-1)
+  while (t <= T)
   {
-    t += dt; 
-    lax_wendroff(U, Mesh);
+    t += dt;
+    lax_wendroff(U, Mesh, dx, dy, dt);
     boundary_conditions(U);
+    std::ostringstream fn;
     fn << "sim/output_t_" << std::fixed << std::setprecision(5) << t << ".dat";
-    file_name = fn.str(); 
+    file_name = fn.str();
     write_data(U, file_name);
   }
-
   return 0;
 }
