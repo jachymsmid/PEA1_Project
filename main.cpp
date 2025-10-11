@@ -2,14 +2,18 @@
 #include <cmath>
 #include <fstream>
 #include <vector>
+#include <iomanip>
+#include <sstream>
+
+
+using RealNumber = float;
 
 // point in 2D Cartesian coordinates
 struct Point
 {
-  double x, y;
+  RealNumber x, y;
 };
 
-using RealNumber = float;
 
 // impose initial conditions
 void initial_conditions(std::vector<std::vector< RealNumber >> &U, std::vector<std::vector<Point>> &Mesh)
@@ -81,6 +85,7 @@ void write_data(std::vector<std::vector<RealNumber>> &U, std::string file_name)
 {
   std::ofstream file;
   file.open(file_name);
+
   if (file)
   {
     for (size_t i = 0; i < U.size(); i++)
@@ -130,6 +135,7 @@ int main()
   std::vector<std::vector<RealNumber>> U(N_x, std::vector<RealNumber>(N_y)); 
   std::vector<std::vector<Point>> Mesh (N_x, std::vector<Point>(N_y));
   std::string file_name;
+  std::ostringstream fn;
 
   mesh(dx, dy, x_min, y_min, Mesh);
   initial_conditions(U, Mesh);
@@ -137,12 +143,13 @@ int main()
   RealNumber dt = cfl_lax_wendroff(dx, dy);
 
   // main loop
-  while (t < T)
+  while (t < T-1)
   {
     t += dt; 
     lax_wendroff(U, Mesh);
     boundary_conditions(U);
-    file_name = "t_%04d.dat", t;
+    fn << "sim/output_t_" << std::fixed << std::setprecision(5) << t << ".dat";
+    file_name = fn.str(); 
     write_data(U, file_name);
   }
 
