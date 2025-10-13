@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Input data file
-DATAFILE="data.dat"
+DATAFILE="sim/output_t_0.dat"
 
 # Output image
 OUTPUT="contour.png"

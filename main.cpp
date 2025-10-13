@@ -5,6 +5,8 @@
 #include <iomanip>
 #include <sstream>
 
+// TODO: transform 2d vectors to 1d
+
 using RealNumber = float;
 
 // point in 2D Cartesian coordinates
