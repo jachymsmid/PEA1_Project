@@ -16,5 +16,6 @@ $$U_{i,j}^{n+1} = U_{i,j}^n - \frac{dt}{2dx}(U_{i+1,j} - U_{i-1,j})-\frac{x_{i,j
 The CFL condition for this scheme is:
 
 $$dt \leq \frac{1}{\frac{1}{dx}+\frac{1}{2x_m dx}}$$,
+
 where $x_m = \max |x|\quad x \in \Omega$.
 ### 3. Upwind scheme
