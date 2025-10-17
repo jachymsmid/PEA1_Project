@@ -5,7 +5,11 @@
 #include <iomanip>
 #include <sstream>
 
-// TODO: transform 2d vectors to 1d
+// TODO:  - [ ] implement better mesh representation
+//        - [x] implement flattened arrays 
+//        - [ ] upwind method
+//        - [ ] lax-friedrichs method
+//        - [x] lax-wendroff method
 
 using RealNumber = float;
 
@@ -15,7 +19,7 @@ struct Point
   RealNumber x, y;
 };
 
-// matrix class for faster 2d array implementation
+// matrix class for faster 2d vector implementation
 class Matrix {
     std::vector<RealNumber> data;
     size_t rows, cols;
@@ -161,10 +165,11 @@ int main()
   // domain definition
   const RealNumber x_min = -1.5, x_max = 1.5, y_min = -1.5, y_max = 1.5;
   // number of grid points in the x, y direction respectively
-  const int N_x = 100, N_y = 100;
+  const int N_x = 0, N_y = 0;
   const RealNumber dx = (x_max-x_min)/N_x, dy = (y_max-y_min)/N_y;
   const RealNumber T = 2.f;
   RealNumber t = 0.f;
+  const std::string sim_name;
 
   // initialize the mesh, U and file_name
   Matrix U(N_x, N_y); 
@@ -175,6 +180,9 @@ int main()
   initial_conditions(U, Mesh);
   write_data(U, "sim/output_t_0.00000.dat");
   RealNumber dt = cfl_lax_wendroff(dx, dy);
+
+  std::cout << "Enter simulation name (folder with the same name will be created): ";
+  std::cin << sim_name;
 
   // main loop
   while (t <= T)
