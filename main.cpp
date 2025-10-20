@@ -181,8 +181,8 @@ int main()
   write_data(U, "sim/output_t_0.00000.dat");
   RealNumber dt = cfl_lax_wendroff(dx, dy);
 
-  std::cout << "Enter simulation name (folder with the same name will be created): ";
-  std::cin << sim_name;
+  // std::cout << "Enter simulation name (folder with the same name will be created): ";
+  // std::cin << sim_name;
 
   // main loop
   while (t <= T)
