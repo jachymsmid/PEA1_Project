@@ -6,80 +6,96 @@
 #include <sstream>
 
 // TODO:  - [ ] implement better mesh representation
-//        - [x] implement flattened arrays 
+//          - [x] implement copy constructor
+//          - [x] implement flattened arrays 
+//            - [ ] maybe Z curves?
 //        - [ ] upwind method
 //        - [ ] lax-friedrichs method
 //        - [x] lax-wendroff method
+//        - [ ] SimulationInfo struct
 
 using RealNumber = float;
 
-// point in 2D Cartesian coordinates
-struct Point
+
+// struct to hold infrmation about the simulation
+struct SimulationInfo
 {
-  RealNumber x, y;
+  const RealNumber step_t, step_x, step_y, x_min, y_min, x_max, y_max;
+  const int number_x, number_y;
 };
 
-// matrix class for faster 2d vector implementation
-class Matrix {
-    std::vector<RealNumber> data;
+// struct to hold cartesian coordinates and a value at that point  
+struct DataPoint
+{
+  RealNumber x, y, value;
+};
+
+// mesh class, glorified array of DataPoints, implemented flattened array  
+class mesh {
+    std::vector<DataPoint> data;
     size_t rows, cols;
 
 public:
-    Matrix(size_t rows, size_t cols)
+    // constructor
+    mesh(size_t rows, size_t cols)
         : data(rows * cols), rows(rows), cols(cols) {}
 
-    RealNumber& operator()(size_t i, size_t j)
+    // copy constructor
+    mesh(mesh &Mesh)
+        : data(Mesh.data), rows(Mesh.rows), cols(Mesh.cols) {}
+
+    DataPoint& operator()(size_t i, size_t j)
     {
         return data[i * cols + j];
     }
-    const RealNumber& operator()(size_t i, size_t j) const
+    const DataPoint& operator()(size_t i, size_t j) const
     {
         return data[i * cols + j];
     }
 
     size_t rowCount() const { return rows; }
     size_t colCount() const { return cols; }
+
+    void construct_grid(RealNumber dx, RealNumber dy, RealNumber x_min, RealNumber y_min)
+    {
+      for (size_t i = 0; i < rows; ++i)
+      {
+        for (size_t j = 0; j < cols; ++j)
+        {
+            data[i * cols + j].x = x_min + i * dx;
+            data[i * cols + j].y = y_min + j * dy;
+        }
+      }
+    }
 };
 
 // impose initial conditions
-void initial_conditions(Matrix &U, std::vector<std::vector<Point>> &Mesh)
+void initial_conditions(mesh &Mesh)
 {
-  for (size_t i = 0; i < U.rowCount(); i++)
+  for (size_t i = 0; i < Mesh.rowCount(); i++)
   {
-    for (size_t j = 0; j < U.colCount(); j++)
+    for (size_t j = 0; j < Mesh.colCount(); j++)
     {
-      U(i,j) = 100*exp(-(pow(Mesh[i][j].x+1,2.0)+pow(Mesh[i][j].y,2.0))/0.01);
+      Mesh(i,j).value = 100*exp(-(pow(Mesh(i,j).x+1,2.0)+pow(Mesh(i,j).y,2.0))/0.01);
     }
   }
 }
 
 // impose boundary conditions
-void boundary_conditions(Matrix &U)
+void boundary_conditions(mesh &Mesh)
 {
-  for (size_t i = 0; i < U.rowCount(); ++i)
+  for (size_t i = 0; i < Mesh.rowCount(); ++i)
   {
-    for (size_t j = 0; j < U.colCount(); ++j)
+    for (size_t j = 0; j < Mesh.colCount(); ++j)
     {
-      if (i == 0 || i == U.rowCount() - 1 || j == 0 || j == U.colCount() - 1)
+      if (i == 0 || i == Mesh.rowCount() - 1 || j == 0 || j == Mesh.colCount() - 1)
       {
-        U(i,j) = 0; 
+        Mesh(i,j).value = 0; 
       }
     }
   }
 }
 
-// construct the mesh
-void mesh(RealNumber dx, RealNumber dy, RealNumber x_min, RealNumber y_min, std::vector<std::vector<Point>> &Mesh)
-{
-  for (size_t i = 0; i < Mesh.size(); ++i)
-  {
-    for (size_t j = 0; j < Mesh[i].size(); ++j)
-    {
-        Mesh[i][j].x = x_min + i * dx;
-        Mesh[i][j].y = y_min + j * dy;
-    }
-  }
-}
 
 // print mesh for troubleshooting reasons
 void print_mesh(std::vector<std::vector<Point>> &Mesh)
@@ -94,31 +110,31 @@ void print_mesh(std::vector<std::vector<Point>> &Mesh)
   }
 }
 
-void print_field(Matrix &U)
+void print_field(mesh &Mesh)
 {
-  for (size_t i = 0; i < U.rowCount(); i++)
+  for (size_t i = 0; i < Mesh.rowCount(); i++)
   {
-    for (size_t j = 0; j < U.colCount(); j++)
+    for (size_t j = 0; j < Mesh.colCount(); j++)
     {
-      std::cout << U(i,j) << " ";
+      std::cout << Mesh(i,j).value << " ";
     }
     std::cout << std::endl;
   }
 }
 
 // write the data to a file
-void write_data(Matrix &U, std::string file_name)
+void write_data(mesh &Mesh, std::string file_name)
 {
   std::ofstream file;
   file.open(file_name);
 
   if (file)
   {
-    for (size_t i = 0; i < U.rowCount(); i++)
+    for (size_t i = 0; i < Mesh.rowCount(); i++)
     {
-      for (size_t j = 0; j < U.colCount(); j++)
+      for (size_t j = 0; j < Mesh.colCount(); j++)
       {
-        file << U(i,j) << " "; 
+        file << Mesh(i,j).value << " "; 
       }
       file << std::endl;
     }
@@ -135,17 +151,17 @@ void upwind()
 {
 }
 
-void lax_wendroff(Matrix &U, std::vector<std::vector<Point>> &Mesh, RealNumber dx, RealNumber dy, RealNumber dt)
+void lax_wendroff(mesh &Mesh, RealNumber dx, RealNumber dy, RealNumber dt)
 {
-  Matrix U_n = U;
+  mesh U_n = Mesh;
   RealNumber lx, ly;
   lx = dt/dx;
-  for(size_t i = 1; i < U.rowCount()-1; i++)
+  for(size_t i = 1; i < Mesh.rowCount()-1; i++)
   {
-    for(size_t j = 1; j < U.colCount()-1; j++)
+    for(size_t j = 1; j < Mesh.colCount()-1; j++)
     {
-      ly = 2*Mesh[i][j].x*dt/dy;
-      U(i,j) = U_n(i,j)
+      ly = 2*Mesh(i,j).x*dt/dy;
+      Mesh(i,j).value = U_n(i,j)
               - lx/2*(U_n(i+1,j) - U_n(i-1,j))
               - ly/2*(U_n(i,j+1) - U_n(i,j-1))
               + pow(lx,2.0)/2*(U_n(i+1,j) - 2*U_n(i,j) + U_n(i-1,j))
@@ -170,15 +186,20 @@ int main()
   const RealNumber T = 2.f;
   RealNumber t = 0.f;
   const std::string sim_name;
+  
+  SimulationInfo sim_info;
+  sim_info.step_x = dx;
+  sim_info.step_y = dy;
+
+
 
   // initialize the mesh, U and file_name
-  Matrix U(N_x, N_y); 
-  std::vector<std::vector<Point>> Mesh (N_x, std::vector<Point>(N_y));
+  mesh Mesh(N_x, N_y); 
   std::string file_name;
 
-  mesh(dx, dy, x_min, y_min, Mesh);
-  initial_conditions(U, Mesh);
-  write_data(U, "sim/output_t_0.00000.dat");
+  Mesh.construct_grid(dx, dy, x_min, y_min);
+  initial_conditions(Mesh);
+  write_data(Mesh, "sim/output_t_0.00000.dat");
   RealNumber dt = cfl_lax_wendroff(dx, dy);
 
   // std::cout << "Enter simulation name (folder with the same name will be created): ";
@@ -188,8 +209,8 @@ int main()
   while (t <= T)
   {
     t += dt;
-    lax_wendroff(U, Mesh, dx, dy, dt);
-    boundary_conditions(U);
+    lax_wendroff(Mesh, sim_info);
+    boundary_conditions(Mesh);
     std::ostringstream fn;
     fn << "sim/output_t_" << std::fixed << std::setprecision(5) << t << ".dat";
     file_name = fn.str();
