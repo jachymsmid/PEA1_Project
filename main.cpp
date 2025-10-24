@@ -6,16 +6,17 @@
 #include <sstream>
 
 // TODO:  - [ ] better mesh representation
-//          - [x] copy constructor
-//          - [x] implement flattened arrays 
-//            - [ ] maybe Z curves?
-//          - [ ] irregular grid method
+//            - [x] copy constructor
+//            - [x] implement flattened arrays 
+//               - [ ] maybe Z curves?
+//            - [ ] irregular grid method
 //        - [ ] upwind method
 //        - [ ] lax-friedrichs method
-//        - [x] lax-wendroff method
+//        - [ ] lax-wendroff method
+//            - [ ] calculate the spatial step in the function
 //        - [ ] SimulationInfo struct
-//          - [x] constructor
-//          - [ ] constructor for default values - should there be one?
+//            - [x] constructor
+//            - [ ] constructor for default values - should there be one?
 //        - [ ] how to implement the numerical solver
 //        - [ ] how to implement boundary/initial conditions?
 
@@ -54,7 +55,14 @@ struct DataPoint
   RealNumber x, y, value;
 };
 
-// mesh class, glorified array of DataPoints, implemented flattened array  
+// mesh class
+//  - glorified array of DataPoints
+//  - flattened array  
+//  - with copy constructor
+//  - methods
+//    - write_data
+//    - getRows
+//    - getCols
 class mesh {
     std::vector<DataPoint> data;
     size_t rows, cols;
