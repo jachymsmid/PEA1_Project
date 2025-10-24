@@ -5,19 +5,21 @@
 #include <iomanip>
 #include <sstream>
 
-// TODO:  - [ ] implement better mesh representation
-//          - [x] implement copy constructor
+// TODO:  - [ ] better mesh representation
+//          - [x] copy constructor
 //          - [x] implement flattened arrays 
 //            - [ ] maybe Z curves?
+//          - [ ] irregular grid method
 //        - [ ] upwind method
 //        - [ ] lax-friedrichs method
 //        - [x] lax-wendroff method
 //        - [ ] SimulationInfo struct
 //          - [x] constructor
-//          - [ ] constructor for default values
+//          - [ ] constructor for default values - should there be one?
+//        - [ ] how to implement the numerical solver
+//        - [ ] how to implement boundary/initial conditions?
 
 using RealNumber = float;
-
 
 // struct to hold infrmation about the simulation
 struct SimulationInfo
@@ -78,6 +80,7 @@ public:
     size_t rowCount() const { return rows; }
     size_t colCount() const { return cols; }
 
+    // method for regular grid construction
     void construct_grid(RealNumber dx, RealNumber dy, RealNumber x_min, RealNumber y_min)
     {
       for (size_t i = 0; i < rows; ++i)
@@ -89,6 +92,7 @@ public:
         }
       }
     }
+
     // write the data to a file
     void write_data(std::string file_name)
     {
@@ -149,8 +153,6 @@ void print_mesh(mesh &Mesh)
   }
 }
 
-
-
 // numerical schemes
 void lax_friedrichs()
 {
@@ -160,6 +162,7 @@ void upwind()
 {
 }
 
+// lax-wendroff scheme
 void lax_wendroff(mesh &Mesh, RealNumber dx, RealNumber dy, RealNumber dt)
 {
   mesh U_n = Mesh;
@@ -204,7 +207,7 @@ int main()
 
   Mesh.construct_grid(dx, dy, x_min, y_min);
   initial_conditions(Mesh);
-  write_data(Mesh, "sim/output_t_0.00000.dat");
+  Mesh.write_data("sim/output_t_0.00000.csv");
   RealNumber dt = cfl_lax_wendroff(dx, dy);
 
   // std::cout << "Enter simulation name (folder with the same name will be created): ";
@@ -217,9 +220,9 @@ int main()
     lax_wendroff(Mesh, sim_info);
     boundary_conditions(Mesh);
     std::ostringstream fn;
-    fn << "sim/output_t_" << std::fixed << std::setprecision(5) << t << ".dat";
+    fn << "sim/output_t_" << std::fixed << std::setprecision(5) << t << ".csv";
     file_name = fn.str();
-    write_data(U, file_name);
+    Mesh.write_data(file_name);
   }
   return 0;
 }
