@@ -165,7 +165,7 @@ void upwind()
 // lax-wendroff scheme
 void lax_wendroff(mesh &Mesh, RealNumber dx, RealNumber dy, RealNumber dt)
 {
-  mesh U_n = Mesh;
+  mesh U_n(Mesh);
   RealNumber lx, ly;
   lx = dt/dx;
   for(size_t i = 1; i < Mesh.rowCount()-1; i++)
@@ -173,12 +173,12 @@ void lax_wendroff(mesh &Mesh, RealNumber dx, RealNumber dy, RealNumber dt)
     for(size_t j = 1; j < Mesh.colCount()-1; j++)
     {
       ly = 2*Mesh(i,j).x*dt/dy;
-      Mesh(i,j).value = U_n(i,j)
-              - lx/2*(U_n(i+1,j) - U_n(i-1,j))
-              - ly/2*(U_n(i,j+1) - U_n(i,j-1))
-              + pow(lx,2.0)/2*(U_n(i+1,j) - 2*U_n(i,j) + U_n(i-1,j))
-              + pow(ly,2.0)/2*(U_n(i,j+1) - 2*U_n(i,j) + U_n(i,j-1))
-              + ly*lx/4*(U_n(i+1,j+1) - U_n(i-1,j+1) - U_n(i+1,j-1) + U_n(i-1,j-1));
+      Mesh(i,j).value = U_n(i,j).value
+              - lx/2*(U_n(i+1,j).value - U_n(i-1,j).value)
+              - ly/2*(U_n(i,j+1).value - U_n(i,j-1).value)
+              + pow(lx,2.0)/2*(U_n(i+1,j).value - 2*U_n(i,j).value + U_n(i-1,j).value)
+              + pow(ly,2.0)/2*(U_n(i,j+1).value - 2*U_n(i,j).value + U_n(i,j-1).value)
+              + ly*lx/4*(U_n(i+1,j+1).value - U_n(i-1,j+1).value - U_n(i+1,j-1).value + U_n(i-1,j-1).value);
     }
   }
 }
@@ -219,9 +219,12 @@ int main()
     t += dt;
     lax_wendroff(Mesh, sim_info);
     boundary_conditions(Mesh);
+    
+    // this is kinda awkward
     std::ostringstream fn;
     fn << "sim/output_t_" << std::fixed << std::setprecision(5) << t << ".csv";
     file_name = fn.str();
+
     Mesh.write_data(file_name);
   }
   return 0;
