@@ -13,8 +13,8 @@
 //        - [ ] lax-friedrichs method
 //        - [x] lax-wendroff method
 //        - [ ] SimulationInfo struct
-//          - [ ] constructor
-//          - [ ] default constructor
+//          - [x] constructor
+//          - [ ] constructor for default values
 
 using RealNumber = float;
 
@@ -89,6 +89,25 @@ public:
         }
       }
     }
+    // write the data to a file
+    void write_data(std::string file_name)
+    {
+      std::ofstream file;
+      file.open(file_name);
+
+      if (file)
+      {
+        for (size_t i = 0; i < rows; i++)
+        {
+          for (size_t j = 0; j < cols;j++)
+          {
+            file << data[i*cols + j].value << " "; 
+          }
+          file << std::endl;
+        }
+      }
+      file.close();
+    }
 };
 
 // impose initial conditions
@@ -118,21 +137,7 @@ void boundary_conditions(mesh &Mesh)
   }
 }
 
-
-// print mesh for troubleshooting reasons
-void print_mesh(std::vector<std::vector<Point>> &Mesh)
-{
-  for (size_t i = 0; i < Mesh.size(); ++i)
-  {
-    for (size_t j = 0; j < Mesh[i].size(); ++j)
-    {
-      std::cout << "(" << Mesh[i][j].x << ", " << Mesh[i][j].y << ") ";
-    }
-    std::cout << std::endl;
-  }
-}
-
-void print_field(mesh &Mesh)
+void print_mesh(mesh &Mesh)
 {
   for (size_t i = 0; i < Mesh.rowCount(); i++)
   {
@@ -144,25 +149,7 @@ void print_field(mesh &Mesh)
   }
 }
 
-// write the data to a file
-void write_data(mesh &Mesh, std::string file_name)
-{
-  std::ofstream file;
-  file.open(file_name);
 
-  if (file)
-  {
-    for (size_t i = 0; i < Mesh.rowCount(); i++)
-    {
-      for (size_t j = 0; j < Mesh.colCount(); j++)
-      {
-        file << Mesh(i,j).value << " "; 
-      }
-      file << std::endl;
-    }
-  }
-  file.close();
-}
 
 // numerical schemes
 void lax_friedrichs()
