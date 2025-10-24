@@ -13,6 +13,8 @@
 //        - [ ] lax-friedrichs method
 //        - [x] lax-wendroff method
 //        - [ ] SimulationInfo struct
+//          - [ ] constructor
+//          - [ ] default constructor
 
 using RealNumber = float;
 
@@ -20,8 +22,28 @@ using RealNumber = float;
 // struct to hold infrmation about the simulation
 struct SimulationInfo
 {
-  const RealNumber step_t, step_x, step_y, x_min, y_min, x_max, y_max;
-  const int number_x, number_y;
+  RealNumber step_t, step_x, step_y, x_min, y_min, x_max, y_max;
+  int number_x, number_y;
+
+  // constructor
+  SimulationInfo( RealNumber step_t,
+                  RealNumber step_x,
+                  RealNumber step_y,
+                  RealNumber x_min,
+                  RealNumber y_min,
+                  RealNumber x_max,
+                  RealNumber y_max,
+                  int number_x,
+                  int number_y)
+                : step_t(step_t),
+                  step_x(step_x),
+                  step_y(step_y),
+                  x_min(x_min),
+                  y_min(y_min),
+                  x_max(x_max),
+                  y_max(y_max),
+                  number_x(number_x),
+                  number_y() {}
 };
 
 // struct to hold cartesian coordinates and a value at that point  
@@ -186,12 +208,8 @@ int main()
   const RealNumber T = 2.f;
   RealNumber t = 0.f;
   const std::string sim_name;
+  SimulationInfo sim_info();
   
-  SimulationInfo sim_info;
-  sim_info.step_x = dx;
-  sim_info.step_y = dy;
-
-
 
   // initialize the mesh, U and file_name
   mesh Mesh(N_x, N_y); 
