@@ -13,7 +13,7 @@
 //        - [ ] upwind method
 //        - [ ] lax-friedrichs method
 //        - [ ] lax-wendroff method
-//            - [ ] calculate the spatial step in the function
+//            - [ ] calculate the spatial step in the function - preparation for irregular grid
 //        - [ ] SimulationInfo struct
 //            - [x] constructor
 //            - [ ] constructor for default values - should there be one?
@@ -69,8 +69,8 @@ class mesh {
 
 public:
     // constructor
-    mesh(size_t rows, size_t cols)
-        : data(rows * cols), rows(rows), cols(cols) {}
+    mesh(SimulationInfo sim_info)
+        : data(sim_info.number_x * sim_info.number_y), rows(sim_info.number_x), cols(sim_info.number_y) {}
 
     // copy constructor
     mesh(mesh &Mesh)
@@ -89,14 +89,14 @@ public:
     size_t colCount() const { return cols; }
 
     // method for regular grid construction
-    void construct_grid(RealNumber dx, RealNumber dy, RealNumber x_min, RealNumber y_min)
+    void construct_grid(SimulationInfo sim_info)
     {
       for (size_t i = 0; i < rows; ++i)
       {
         for (size_t j = 0; j < cols; ++j)
         {
-            data[i * cols + j].x = x_min + i * dx;
-            data[i * cols + j].y = y_min + j * dy;
+            data[i * cols + j].x = sim_info.x_min + i * sim_info.step_x;
+            data[i * cols + j].y = sim_info.y_min + j * sim_info.step_y;
         }
       }
     }
@@ -171,10 +171,13 @@ void upwind()
 }
 
 // lax-wendroff scheme
-void lax_wendroff(mesh &Mesh, RealNumber dx, RealNumber dy, RealNumber dt)
+void lax_wendroff(mesh &Mesh, SimulationInfo sim_info)
 {
   mesh U_n(Mesh);
-  RealNumber lx, ly;
+  RealNumber lx, ly, dx, dy, dt;
+  dx = sim_info.step_x;
+  dy = sim_info.step_y;
+  dt = sim_info.step_t;
   lx = dt/dx;
   for(size_t i = 1; i < Mesh.rowCount()-1; i++)
   {
@@ -206,17 +209,27 @@ int main()
   const RealNumber T = 2.f;
   RealNumber t = 0.f;
   const std::string sim_name;
-  SimulationInfo sim_info();
+  RealNumber dt = cfl_lax_wendroff(dx, dy);
+  SimulationInfo sim_info;
+  SimulationInfo sim_info(
+      const RealNumber dt,
+      const RealNumber dx,
+      const RealNumber dy,
+      const RealNumber x_min,
+      const RealNumber y_min,
+      const RealNumber x_max,
+      const RealNumber y_max,
+      const int N_x,
+      const int N_y);
   
 
   // initialize the mesh, U and file_name
-  mesh Mesh(N_x, N_y); 
+  mesh Mesh(sim_info); 
   std::string file_name;
 
-  Mesh.construct_grid(dx, dy, x_min, y_min);
+  Mesh.construct_grid(sim_info);
   initial_conditions(Mesh);
   Mesh.write_data("sim/output_t_0.00000.csv");
-  RealNumber dt = cfl_lax_wendroff(dx, dy);
 
   // std::cout << "Enter simulation name (folder with the same name will be created): ";
   // std::cin << sim_name;
