@@ -15,7 +15,7 @@
 //        - [ ] lax-wendroff method
 //            - [ ] calculate the spatial step in the function - preparation for irregular grid
 //        - [ ] SimulationInfo struct
-//            - [x] constructor
+//            - [x] constructor - is it working??
 //            - [ ] constructor for default values - should there be one?
 //        - [ ] how to implement the numerical solver
 //        - [ ] how to implement boundary/initial conditions?
@@ -49,7 +49,7 @@ struct SimulationInfo
                   number_y() {}
 };
 
-// struct to hold cartesian coordinates and a value at that point  
+// struct to hold cartesian coordinates of a point and a value at that point  
 struct DataPoint
 {
   RealNumber x, y, value;
@@ -63,6 +63,7 @@ struct DataPoint
 //    - write_data
 //    - getRows
 //    - getCols
+//    - print_data
 class mesh {
     std::vector<DataPoint> data;
     size_t rows, cols;
@@ -120,6 +121,19 @@ public:
       }
       file.close();
     }
+
+    // print the mesh to the command line, for troubleshooting
+    void print_mesh(mesh &Mesh)
+    {
+      for (size_t i = 0; i < Mesh.rowCount(); i++)
+      {
+        for (size_t j = 0; j < Mesh.colCount(); j++)
+        {
+          std::cout << Mesh(i,j).value << " ";
+        }
+        std::cout << std::endl;
+      }
+    }
 };
 
 // impose initial conditions
@@ -129,7 +143,7 @@ void initial_conditions(mesh &Mesh)
   {
     for (size_t j = 0; j < Mesh.colCount(); j++)
     {
-      Mesh(i,j).value = 100*exp(-(pow(Mesh(i,j).x+1,2.0)+pow(Mesh(i,j).y,2.0))/0.01);
+      Mesh(i,j).value = 100 * exp( - ( pow(Mesh(i,j).x + 1,2.0)+pow(Mesh(i,j).y,2.0) ) / 0.01);
     }
   }
 }
@@ -149,17 +163,7 @@ void boundary_conditions(mesh &Mesh)
   }
 }
 
-void print_mesh(mesh &Mesh)
-{
-  for (size_t i = 0; i < Mesh.rowCount(); i++)
-  {
-    for (size_t j = 0; j < Mesh.colCount(); j++)
-    {
-      std::cout << Mesh(i,j).value << " ";
-    }
-    std::cout << std::endl;
-  }
-}
+
 
 // numerical schemes
 void lax_friedrichs()
@@ -178,25 +182,24 @@ void lax_wendroff(mesh &Mesh, SimulationInfo sim_info)
   dx = sim_info.step_x;
   dy = sim_info.step_y;
   dt = sim_info.step_t;
-  lx = dt/dx;
-  for(size_t i = 1; i < Mesh.rowCount()-1; i++)
+  lx = dt / dx;
+  for(size_t i = 1; i < Mesh.rowCount() - 1; i++)
   {
-    for(size_t j = 1; j < Mesh.colCount()-1; j++)
+    for(size_t j = 1; j < Mesh.colCount() - 1; j++)
     {
       ly = 2*Mesh(i,j).x*dt/dy;
       Mesh(i,j).value = U_n(i,j).value
-              - lx/2*(U_n(i+1,j).value - U_n(i-1,j).value)
-              - ly/2*(U_n(i,j+1).value - U_n(i,j-1).value)
-              + pow(lx,2.0)/2*(U_n(i+1,j).value - 2*U_n(i,j).value + U_n(i-1,j).value)
-              + pow(ly,2.0)/2*(U_n(i,j+1).value - 2*U_n(i,j).value + U_n(i,j-1).value)
-              + ly*lx/4*(U_n(i+1,j+1).value - U_n(i-1,j+1).value - U_n(i+1,j-1).value + U_n(i-1,j-1).value);
+              - lx / 2 * ( U_n(i + 1,j).value - U_n(i - 1,j).value )
+              - ly / 2 * ( U_n(i,j + 1).value - U_n(i,j - 1).value )
+              + pow(lx,2.0) / 2 * ( U_n(i + 1,j).value - 2 * U_n(i,j).value + U_n(i - 1,j).value )
+              + pow(ly,2.0) / 2 * (U_n(i,j + 1).value - 2 * U_n(i,j).value + U_n(i,j - 1).value )
+              + ly * lx / 4 * (U_n(i + 1,j + 1).value - U_n(i - 1,j + 1).value - U_n(i + 1,j - 1).value + U_n(i - 1,j - 1).value );
     }
-  }
 }
 
 RealNumber cfl_lax_wendroff(RealNumber dx, RealNumber dy)
 {
-  return 1.0/(1.0/dx+1.0/2.0*1.5*dy);
+  return 1.0 / (1.0 / dx + 1.0 / 2.0 * 1.5 * dy);
 }
 
 int main()
@@ -205,7 +208,7 @@ int main()
   const RealNumber x_min = -1.5, x_max = 1.5, y_min = -1.5, y_max = 1.5;
   // number of grid points in the x, y direction respectively
   const int N_x = 0, N_y = 0;
-  const RealNumber dx = (x_max-x_min)/N_x, dy = (y_max-y_min)/N_y;
+  const RealNumber dx = (x_max-x_min) / N_x, dy = (y_max-y_min) / N_y;
   const RealNumber T = 2.f;
   RealNumber t = 0.f;
   const std::string sim_name;
