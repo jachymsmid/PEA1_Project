@@ -117,15 +117,7 @@ public:
         {
           for (size_t j = 0; j < cols;j++)
           {
-            // we want to end every line with just a \n character
-            if (j == cols - 1)
-            {
-              file << data[i*cols + j].value << std::endl;
-            }
-            else
-            {
-              file << data[i*cols + j].value << ","; 
-            }
+              file << data[i * cols + j].x << "," << data[i * cols + j].y << "," << data[i * cols + j].value << std::endl;
           }
         }
       }
@@ -150,7 +142,7 @@ public:
 // lax-friedrichs scheme
 struct Lax_Friedrichs
 {
-    static void func(Mesh &mesh, SimulationInfo sim_info)
+    static void solve(Mesh &mesh, SimulationInfo sim_info)
     {
         Mesh U_n(mesh); 
         RealNumber dx, dy, dt, p = 1.0f;
@@ -190,7 +182,7 @@ RealNumber cfl_lax_friedrichs(RealNumber dx, RealNumber dy)
 // lax-wendroff scheme
 struct Lax_Wendroff
 {
-  static void func(Mesh &mesh, SimulationInfo sim_info)
+  static void solve(Mesh &mesh, SimulationInfo sim_info)
   {
     Mesh U_n(mesh);
     RealNumber lx, ly, dx, dy, dt;
@@ -212,7 +204,15 @@ struct Lax_Wendroff
       }
     }
   }
+
+  static RealNumber cfl(RealNumber dx, RealNumber dy)
+  {
+    return 1.0 / (1.0 / dx + 1.0 / 2.0 * 1.5 * dy);
+  }
 };
+
+
+
 
 // upwind scheme
 struct Upwind
@@ -226,10 +226,14 @@ struct Upwind
 template <typename T>
 void NumericalSolver(Mesh &mesh, SimulationInfo sim_info)
 {
-  T::func(mesh, sim_info);
+  T::solve(mesh, sim_info);
 }
 
-
+template <typename T>
+RealNumber CFL( RealNumber dx, RealNumber dy)
+{
+  return T::cfl(dx, dy);
+}
 
 // impose initial conditions
 void initial_conditions(Mesh &mesh)
@@ -260,34 +264,18 @@ void boundary_conditions(Mesh &mesh)
 
 
 
-// numerical schemes
-void lax_friedrichs()
-{
-}
-
-void upwind()
-{
-}
-
-// lax-wendroff scheme
-
-
-RealNumber cfl_lax_wendroff(RealNumber dx, RealNumber dy)
-{
-  return 1.0 / (1.0 / dx + 1.0 / 2.0 * 1.5 * dy);
-}
 
 int main()
 {
   // domain definition
   const RealNumber x_min = - 1.5, x_max = 1.5, y_min = - 1.5, y_max = 1.5;
   // number of grid points in the x, y direction respectively
-  const int N_x = 10, N_y = 10;
+  const int N_x = 100, N_y = 100;
   const RealNumber dx = (x_max-x_min) / N_x, dy = (y_max-y_min) / N_y;
   const RealNumber T = 2.f;
   RealNumber t = 0.f;
   const std::string sim_name;
-  RealNumber dt = cfl_lax_wendroff(dx, dy);
+  RealNumber dt = CFL < Lax_Wendroff >(dx, dy);
 
   SimulationInfo sim_info(dt, dx, dy, x_min, y_min, x_max, y_max, N_x, N_y);
   
