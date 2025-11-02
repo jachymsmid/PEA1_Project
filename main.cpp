@@ -150,10 +150,42 @@ public:
 // lax-friedrichs scheme
 struct Lax_Friedrichs
 {
-  static void func()
-  {
-  }
+    static void func(Mesh &mesh, SimulationInfo sim_info)
+    {
+        Mesh U_n(mesh); 
+        RealNumber dx, dy, dt, p = 1.0f;
+
+        dx = sim_info.step_x;
+        dy = sim_info.step_y;
+        dt = sim_info.step_t;
+
+        for(size_t i = 1; i < mesh.getRows() - 1; i++)
+        {
+            for(size_t j = 1; j < mesh.getCols() - 1; j++)
+            {
+
+                RealNumber x_j = U_n(i, j).x; 
+
+                mesh(i,j).value = 
+                      1.0f / 4.0f * ( U_n(i + 1, j).value + U_n(i - 1, j).value + U_n(i, j + 1).value + U_n(i, j - 1).value )
+                    - dt * ( 
+                          ( U_n(i + 1, j).value - U_n(i - 1, j).value ) / ( 2.0f * dx ) // u_x
+                        - 2.0f * p * x_j * ( U_n(i, j + 1).value - U_n(i, j - 1).value ) / ( 2.0f * dy ) 
+                      );
+            }
+        }
+    }
 };
+
+// Funkce pro výpočet maximálního stabilního časového kroku (dt)
+RealNumber cfl_lax_friedrichs(RealNumber dx, RealNumber dy)
+{
+    // podmínka pozitivity
+    RealNumber dt_limit_x = dx / 2.0f;
+    RealNumber dt_limit_y = dy / 6.0f; 
+    
+    return std::min(dt_limit_x, dt_limit_y);
+}
 
 // lax-wendroff scheme
 struct Lax_Wendroff
