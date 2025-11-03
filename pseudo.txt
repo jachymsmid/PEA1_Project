@@ -1,0 +1,125 @@
+
+SimulationInfo
+{
+  dx,
+  dy,
+  ...
+}
+
+DataPoint
+{
+  x_cord,
+  y_cord,
+  value
+}
+
+Mesh
+{
+  array < DataPoint >,
+  rows,
+  cols
+
+  constructor( )
+
+  copy_constructor( Mesh )
+
+  acces_operator()( i, j )
+
+  getter_cols( )
+
+  getter_rows( )
+
+  construct_grid( SimulationInfo )
+
+  write_data( )
+
+}
+
+NumericalScheme
+{
+  static void Solve( Mesh, SimulationInfo )
+
+  static Cfl( dx, dy ) 
+}
+
+
+template T
+NumericalSolver( Mesh, SimulationInfo )
+{
+  T::Solve( Mesh, SimulationInfo)
+}
+
+template T
+CFL( dx, dy )
+{
+  T::Cfl( dx, dy )
+}
+
+MyBoundaryConditions
+{
+  static Impose( Mesh )
+  {
+    for i < rows
+
+      for j < cols
+
+        if i == 0 or i == rows - 1 or j == 0 or j == cols - 1
+
+          Mesh[i][j] = expression
+
+      end
+
+    end
+  }
+}
+
+MyInitialConditions
+{
+  static Impose
+  {
+    for i < rows
+
+      for j < cols
+
+        Mesh[i][j] = expression
+
+      end
+    
+    end
+  }
+}
+
+template T
+InitialConditions( Mesh )
+{
+  T::Impose( Mesh )
+}
+
+template T
+BoundaryConditions( Mesh )
+{
+  T::Impose( Mesh )
+}
+
+main()
+{
+  const dx, dy, ...
+
+  dt = CFL< NumericalScheme >( dx, dy )
+
+  SimulationInfo( dx, dy, ... )
+
+  InitialConditions< MyInitialConditions >( Mesh )
+
+  while t < T
+
+    t += dt
+
+    NumericalSolver< NumericalScheme >( Mesh, SimulationInfo )
+
+    BoundaryConditions< MyBoundaryConditions >( Mesh )
+
+    Mesh.write_data()
+
+  end
+}
