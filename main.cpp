@@ -11,7 +11,7 @@
 //               - [ ] maybe Z curves?
 //            - [ ] irregular grid method - too elaborate?
 //        - [ ] upwind method
-//        - [ ] lax-friedrichs method
+//        - [x] lax-friedrichs method
 //        - [ ] lax-wendroff method
 //            - [ ] calculate the spatial step in the function - preparation for irregular grid
 //            - [ ] clearer and simpler code
@@ -167,17 +167,17 @@ struct Lax_Friedrichs
             }
         }
     }
-};
 
-// Funkce pro výpočet maximálního stabilního časového kroku (dt)
-RealNumber cfl_lax_friedrichs(RealNumber dx, RealNumber dy)
-{
-    // podmínka pozitivity
-    RealNumber dt_limit_x = dx / 2.0f;
-    RealNumber dt_limit_y = dy / 6.0f; 
-    
-    return std::min(dt_limit_x, dt_limit_y);
-}
+    // Funkce pro výpočet maximálního stabilního časového kroku (dt)
+    static RealNumber cfl(RealNumber dx, RealNumber dy)
+    {
+        // podmínka pozitivity
+        RealNumber dt_limit_x = dx / 2.0f;
+        RealNumber dt_limit_y = dy / 6.0f; 
+        
+        return std::min(dt_limit_x, dt_limit_y);
+    }
+};
 
 // lax-wendroff scheme
 struct Lax_Wendroff
@@ -211,9 +211,6 @@ struct Lax_Wendroff
   }
 };
 
-
-
-
 // upwind scheme
 struct Upwind
 {
@@ -235,35 +232,50 @@ RealNumber CFL( RealNumber dx, RealNumber dy)
   return T::cfl(dx, dy);
 }
 
-// impose initial conditions
-void initial_conditions(Mesh &mesh)
+// initial conditions struct
+struct My_Initial_Conditions
 {
-  for (size_t i = 0; i < mesh.getRows(); i++)
+  static void impose(Mesh &mesh)
   {
-    for (size_t j = 0; j < mesh.getCols(); j++)
+    for (size_t i = 0; i < mesh.getRows(); i++)
     {
-      mesh(i,j).value = 100 * exp( - ( pow(mesh(i,j).x + 1, 2.0)+pow(mesh(i,j).y, 2.0) ) / 0.01);
-    }
-  }
-}
-
-// impose boundary conditions
-void boundary_conditions(Mesh &mesh)
-{
-  for (size_t i = 0; i < mesh.getRows(); ++i)
-  {
-    for (size_t j = 0; j < mesh.getCols(); ++j)
-    {
-      if (i == 0 || i == mesh.getRows() - 1 || j == 0 || j == mesh.getCols() - 1)
+      for (size_t j = 0; j < mesh.getCols(); j++)
       {
-        mesh(i,j).value = 0; 
+        mesh(i,j).value = 100 * exp( - ( pow(mesh(i,j).x + 1, 2.0)+pow(mesh(i,j).y, 2.0) ) / 0.01);
       }
     }
   }
+};
+
+// boundary conditions struct
+struct Zeros 
+{
+  static void impose(Mesh &mesh)
+  {
+    for (size_t i = 0; i < mesh.getRows(); ++i)
+    {
+      for (size_t j = 0; j < mesh.getCols(); ++j)
+      {
+        if (i == 0 || i == mesh.getRows() - 1 || j == 0 || j == mesh.getCols() - 1)
+        {
+          mesh(i,j).value = 0; 
+        }
+      }
+    }
+  }
+};
+
+template< typename T >
+void InitialConditions( Mesh &mesh)
+{
+  T::impose( mesh );
 }
 
-
-
+template< typename T >
+void BoundaryConditions( Mesh &mesh )
+{
+  T::impose( mesh );
+}
 
 int main()
 {
@@ -289,7 +301,7 @@ int main()
   mesh.construct_grid(sim_info);
   std::cout << "Grid construction..." << std::endl;
 
-  initial_conditions(mesh);
+  InitialConditions< My_Initial_Conditions >(mesh);
   std::cout << "Imposing initial conditions..." << std::endl;
 
   mesh.write_data("sim/output_t_0.00000.csv");
@@ -302,7 +314,7 @@ int main()
   {
     t += dt;
     NumericalSolver< Lax_Wendroff >(mesh, sim_info);
-    boundary_conditions(mesh);
+    BoundaryConditions< Zeros >(mesh);
 
     // this is kinda awkward
     std::ostringstream fn;
