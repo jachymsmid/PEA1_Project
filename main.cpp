@@ -20,7 +20,10 @@
 //        - [x] how to implement the numerical solver
 //            - [x] using the function template
 //            - [o] using a pointer to a function
-//        - [ ] how to implement boundary/initial conditions?
+//        - [x] how to implement boundary/initial conditions?
+//            - [x] templates
+//        - [ ] change the array of structer to structure of array
+//        - [ ] library VTK
 
 using RealNumber = float;
 
@@ -81,16 +84,27 @@ public:
 
     DataPoint& operator()(size_t i, size_t j)
     {
-        return data[i * cols + j];
+      if ( i > rows || j > cols )
+      {
+        throw std::out_of_range("Index out of bounds");
+      }
+
+      return data[i * cols + j];
     }
+
     const DataPoint& operator()(size_t i, size_t j) const
     {
-        return data[i * cols + j];
+      if ( i > rows || j > cols )
+      {
+        throw std::out_of_range("Index out of bounds");
+      }
+
+      return data[i * cols + j];
     }
 
     // getters for number of columns and rows
-    size_t getCols() { return cols; }
-    size_t getRows() { return rows; }
+    size_t getCols() const { return cols; }
+    size_t getRows() const { return rows; }
 
     // method for regular grid construction
     void construct_grid(SimulationInfo sim_info)
@@ -293,16 +307,16 @@ int main()
   
 
   // initialize the mesh, U and file_name
-  std::cout << "Simulation info initialization..." << std::endl;
+  //std::cout << "Simulation info initialization..." << std::endl;
   Mesh mesh(sim_info); 
-  std::cout << "Mesh initialization..." << std::endl;
+  //std::cout << "Mesh initialization..." << std::endl;
   std::string file_name;
 
   mesh.construct_grid(sim_info);
-  std::cout << "Grid construction..." << std::endl;
+  //std::cout << "Grid construction..." << std::endl;
 
   InitialConditions< My_Initial_Conditions >(mesh);
-  std::cout << "Imposing initial conditions..." << std::endl;
+  //std::cout << "Imposing initial conditions..." << std::endl;
 
   mesh.write_data("sim/output_t_0.00000.csv");
 
