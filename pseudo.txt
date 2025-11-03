@@ -1,3 +1,4 @@
+// Solver for the advection equation in 2D
 
 SimulationInfo
 {
@@ -15,7 +16,7 @@ DataPoint
 
 Mesh
 {
-  array < DataPoint >,
+  vector < DataPoint >,
   rows,
   cols
 
@@ -23,7 +24,7 @@ Mesh
 
   copy_constructor( Mesh )
 
-  acces_operator()( i, j )
+  acces_operator()( i, j ) // because of flattened array
 
   getter_cols( )
 
@@ -38,6 +39,20 @@ Mesh
 NumericalScheme
 {
   static void Solve( Mesh, SimulationInfo )
+  {
+    
+    Mesh_copy = Mesh( Mesh )
+
+    for i < rows
+
+      for j < cols
+
+        Mesh_copy[i][j] = expression
+
+      end
+
+    end
+  }
 
   static Cfl( dx, dy ) 
 }
@@ -66,6 +81,8 @@ MyBoundaryConditions
         if i == 0 or i == rows - 1 or j == 0 or j == cols - 1
 
           Mesh[i][j] = expression
+
+        end
 
       end
 
