@@ -6,6 +6,8 @@
 #include <sstream>
 
 // TODO:  - [ ] better mesh representation
+//            - [ ] change the array of structer paradigm to structure of array
+//                - [ ] how to acces the data?
 //            - [x] copy constructor
 //            - [x] implement flattened arrays 
 //               - [ ] maybe Z curves?
@@ -21,9 +23,10 @@
 //            - [x] using the function template
 //            - [o] using a pointer to a function
 //        - [x] how to implement boundary/initial conditions?
-//            - [x] templates
-//        - [ ] change the array of structer to structure of array
-//        - [ ] library VTK
+//            - [x] again function templates
+//        - [ ] VTK library for data storage and visualization
+//        - [ ] error handling
+//        - [ ] generalize the schemes?
 
 using RealNumber = float;
 
@@ -60,29 +63,33 @@ struct DataPoint
   RealNumber x, y, value;
 };
 
-// mesh class
-//  - glorified array of DataPoints
-//  - flattened array  
-//  - with copy constructor
-//  - methods
-//    - write_data
-//    - getRows
-//    - getCols
-//    - print_data
-class Mesh {
-    std::vector<DataPoint> data;
+// ---------------
+//    mesh class
+// ---------------
+class Mesh
+{
+    std::vector<RealNumber> data;
+    std::vector<RealNumber> x_cord;
+    std::vector<RealNumber> y_cord;
     size_t rows, cols;
 
 public:
     // constructor
     Mesh(SimulationInfo sim_info)
-        : data(sim_info.number_x * sim_info.number_y), rows(sim_info.number_x), cols(sim_info.number_y) {}
+        : data(sim_info.number_x * sim_info.number_y),
+          x_cord(sim_info.number_x * sim_info.number_y),
+          y_cord(sim_info.number_x * sim_info.number_y),
+          rows(sim_info.number_x), cols(sim_info.number_y) {}
 
     // copy constructor
     Mesh(Mesh &mesh)
-        : data(mesh.data), rows(mesh.rows), cols(mesh.cols) {}
+        : data(mesh.data),
+          x_cord(mesh.x_cord),
+          y_cord(mesh.y_cord),
+          rows(mesh.rows),
+          cols(mesh.cols) {}
 
-    DataPoint& operator()(size_t i, size_t j)
+    RealNumber& operator()(size_t i, size_t j)
     {
       if ( i > rows || j > cols )
       {
@@ -92,7 +99,7 @@ public:
       return data[i * cols + j];
     }
 
-    const DataPoint& operator()(size_t i, size_t j) const
+    const RealNumber& operator()(size_t i, size_t j) const
     {
       if ( i > rows || j > cols )
       {
@@ -107,14 +114,14 @@ public:
     size_t getRows() const { return rows; }
 
     // method for regular grid construction
-    void construct_grid(SimulationInfo sim_info)
+    void construct_regular_grid(SimulationInfo sim_info)
     {
       for (size_t i = 0; i < rows; ++i)
       {
         for (size_t j = 0; j < cols; ++j)
         {
-            data[i * cols + j].x = sim_info.x_min + i * sim_info.step_x;
-            data[i * cols + j].y = sim_info.y_min + j * sim_info.step_y;
+            x_cord[i * cols + j] = sim_info.x_min + i * sim_info.step_x;
+            y_cord[i * cols + j] = sim_info.y_min + j * sim_info.step_y;
         }
       }
     }
@@ -152,7 +159,10 @@ public:
     }
 };
 
-// numerical solvers structs
+// ----------------------------
+// numerical solvers structures
+// ----------------------------
+
 // lax-friedrichs scheme
 struct Lax_Friedrichs
 {
@@ -240,13 +250,16 @@ void NumericalSolver(Mesh &mesh, SimulationInfo sim_info)
   T::solve(mesh, sim_info);
 }
 
+// generalized cfl condition function
 template <typename T>
 RealNumber CFL( RealNumber dx, RealNumber dy)
 {
   return T::cfl(dx, dy);
 }
 
-// initial conditions struct
+// -----------------------------
+// initial conditions structures
+// -----------------------------
 struct My_Initial_Conditions
 {
   static void impose(Mesh &mesh)
@@ -261,7 +274,16 @@ struct My_Initial_Conditions
   }
 };
 
-// boundary conditions struct
+// generalized initial conditions function
+template< typename T >
+void InitialConditions( Mesh &mesh)
+{
+  T::impose( mesh );
+}
+
+// ------------------------------
+// boundary conditions structures
+// ------------------------------
 struct Zeros 
 {
   static void impose(Mesh &mesh)
@@ -279,18 +301,16 @@ struct Zeros
   }
 };
 
-template< typename T >
-void InitialConditions( Mesh &mesh)
-{
-  T::impose( mesh );
-}
-
+// generalized boundary conditions function 
 template< typename T >
 void BoundaryConditions( Mesh &mesh )
 {
   T::impose( mesh );
 }
 
+// -------------
+//      main
+// -------------
 int main()
 {
   // domain definition
