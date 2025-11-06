@@ -34,7 +34,6 @@ using RealNumber = float;
 //      - Lax_Wendroff
 //      - Lax_Friedrich
 //      - Upwind
-using NumericalScheme = Lax_Wendroff;
 
 // struct to hold infrmation about the simulation
 struct SimulationInfo
@@ -271,6 +270,9 @@ void NumericalSolver(Mesh &mesh, SimulationInfo sim_info)
   T::solve(mesh, sim_info);
 }
 
+using NumericalScheme = Lax_Wendroff;
+
+
 // generalized cfl condition function
 template <typename T>
 RealNumber CFL( RealNumber dx, RealNumber dy)
@@ -353,7 +355,7 @@ int main()
   //std::cout << "Mesh initialization..." << std::endl;
   std::string file_name;
 
-  mesh.construct_grid(sim_info);
+  mesh.construct_regular_grid(sim_info);
   //std::cout << "Grid construction..." << std::endl;
 
   InitialConditions< My_Initial_Conditions >(mesh);
