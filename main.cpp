@@ -10,7 +10,8 @@
 //                - [ ] how to acces the data?
 //            - [x] copy constructor
 //            - [x] implement flattened arrays 
-//               - [ ] maybe Z curves?
+//               - [x] maybe Z-curves?
+//                  - [ ] conditions for Z-curves usage
 //            - [ ] irregular grid method - too elaborate?
 //        - [ ] upwind method
 //        - [x] lax-friedrichs method
@@ -59,7 +60,10 @@ struct SimulationInfo
                   x_max(x_max),
                   y_max(y_max),
                   number_x(number_x),
-                  number_y(number_y) {}
+                  number_y(number_y)
+  {
+    std::cout << "Simulation info initialization..." << std::endl;
+  }
 };
 
 // ---------------
@@ -67,10 +71,25 @@ struct SimulationInfo
 // ---------------
 class Mesh
 {
-    std::vector<RealNumber> data;
-    std::vector<RealNumber> x_cord;
-    std::vector<RealNumber> y_cord;
+private:
+
+    std::vector< RealNumber > data;
+    std::vector< RealNumber > x_cord;
+    std::vector< RealNumber > y_cord;
     size_t rows, cols;
+
+    size_t indices(size_t n)
+    {
+      size_t result = 0;
+      size_t base = 1;
+      while (n > 0) 
+      {
+        if (n & 1) result += base;
+        base *= 4;
+        n >>= 1;
+      }
+      return result;
+    }
 
 public:
     // constructor
@@ -78,7 +97,10 @@ public:
         : data(sim_info.number_x * sim_info.number_y),
           x_cord(sim_info.number_x * sim_info.number_y),
           y_cord(sim_info.number_x * sim_info.number_y),
-          rows(sim_info.number_x), cols(sim_info.number_y) {}
+          rows(sim_info.number_x), cols(sim_info.number_y)
+  {
+    std::cout << "Mesh initialization..." << std::endl;
+  }
 
     // copy constructor
     Mesh(Mesh &mesh)
@@ -88,7 +110,44 @@ public:
           rows(mesh.rows),
           cols(mesh.cols) {}
 
-    // getter/setter for data
+    // getter/setter using Z-order curve
+    //RealNumber& value_ref(size_t i, size_t j)
+    //{
+    //  if ( 2 * indices(i) + indices(j) > rows * cols )
+    //  {
+    //    throw std::out_of_range("Index out of bounds");
+    //  }
+    //  return data[ 2 * indices(i) + indices(j) ];
+    //}
+
+    //const RealNumber& value( size_t i, size_t j )
+    //{
+    //if ( 2 * indices(i) + indices(j) > rows * cols )
+    //  {
+    //    throw std::out_of_range("Index out of bounds");
+    //  }
+    //  return data[ 2 * indices(i) + indices(j) ];
+    //}
+
+    //const RealNumber& x(size_t i, size_t j)
+    //{
+    //  if ( 2 * indices(i) + indices(j) > rows * cols )
+    //  {
+    //    throw std::out_of_range("Index out of bounds");
+    //  }
+    //  return x_cord[ 2 * indices(i) + indices(j) ];
+    //}
+
+    //const RealNumber& y(size_t i, size_t j)
+    //{
+    //  if ( 2 * indices(i) + indices(j) > rows * cols )
+    //  {
+    //    throw std::out_of_range("Index out of bounds");
+    //  }
+    //  return data[ 2 * indices(i) + indices(j) ];
+    //}
+
+  // getter/setter for data
     RealNumber& value_ref(size_t i, size_t j)
     {
       if ( i > rows || j > cols )
@@ -129,6 +188,7 @@ public:
       }
       return data[i * cols + j];
     }
+
     // getters for number of columns and rows
     size_t getCols() const { return cols; }
     size_t getRows() const { return rows; }
@@ -144,6 +204,7 @@ public:
             y_cord[i * cols + j] = sim_info.y_min + j * sim_info.step_y;
         }
       }
+      std::cout << "Regular grid constructed..." << std::endl;
     }
 
     // write the data to a file
@@ -339,7 +400,7 @@ int main()
   // domain definition
   const RealNumber x_min = - 1.5, x_max = 1.5, y_min = - 1.5, y_max = 1.5;
   // number of grid points in the x, y direction respectively
-  const int N_x = 100, N_y = 100;
+  const int N_x = 64, N_y = 64;
   const RealNumber dx = (x_max-x_min) / N_x, dy = (y_max-y_min) / N_y;
   const RealNumber T = 2.f;
   RealNumber t = 0.f;
@@ -350,16 +411,13 @@ int main()
   
 
   // initialize the mesh, U and file_name
-  //std::cout << "Simulation info initialization..." << std::endl;
   Mesh mesh(sim_info); 
-  //std::cout << "Mesh initialization..." << std::endl;
   std::string file_name;
 
   mesh.construct_regular_grid(sim_info);
-  //std::cout << "Grid construction..." << std::endl;
 
   InitialConditions< My_Initial_Conditions >(mesh);
-  //std::cout << "Imposing initial conditions..." << std::endl;
+  std::cout << "Imposing initial conditions..." << std::endl;
 
   mesh.write_data("sim/output_t_0.00000.csv");
 
