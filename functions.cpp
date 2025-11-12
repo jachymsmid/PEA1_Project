@@ -220,18 +220,6 @@ RealNumber Upwind::cfl(RealNumber dx, RealNumber dy)
     return 1.0f / (fabs(a)/dx + fabs(b)/dy);
 }
 
-template < typename T >
-void NumericalSolver( Mesh &mesh, SimulationInfo sim_info )
-{
-  T::solve( mesh, sim_info );
-}
-
-template < typename T >
-RealNumber CFL( RealNumber dx, RealNumber dy )
-{
-  T::cfl( dx, dy );
-}
-
 // initial conditions
 
 void My_Initial_Conditions::impose( Mesh &mesh )
@@ -243,12 +231,6 @@ void My_Initial_Conditions::impose( Mesh &mesh )
       mesh.value_ref(i,j) = 100 * exp( - ( pow(mesh.x(i,j) + 1, 2.0) + pow(mesh.y(i,j), 2.0) ) / 0.01);
     }
   }
-}
-
-template < typename T >
-void InitialConditions( Mesh &mesh )
-{
-  T::impose( mesh );
 }
 
 // boundary conditions
@@ -266,9 +248,3 @@ void Zeros::impose( Mesh &mesh )
     }
   }
 }
-
-template < typename T >
-void BoundaryConditions( Mesh &mesh )
-{
-  T::impose( mesh );
-};
