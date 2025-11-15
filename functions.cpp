@@ -3,6 +3,10 @@
 #include <fstream>
 #include <cmath>
 
+#include <vtkSmartPointer.h>
+#include <vtkImageData.h>
+#include <vtkXMLImageDataWriter.h>
+
 // SimulationInfo
 
 SimulationInfo::SimulationInfo(
@@ -104,20 +108,22 @@ void Mesh::construct_regular_grid( SimulationInfo sim_info )
 
 void Mesh::write_data( std::string file_name )
 {
-  std::ofstream file;
-  file.open(file_name);
+  vtkSmartPointer< vtkImageData > image = vtkSmartPointer< vtkImageData >::New();
+  image -> SetDimensions( cols, rows, 1 );
+  image -> AllocateScalars( VTK_FLOAT, 1 );
 
-  if (file)
+  for (size_t i = 0; i < rows; i++)
   {
-    for (size_t i = 0; i < rows; i++)
+    for (size_t j = 0; j < cols; j++)
     {
-      for (size_t j = 0; j < cols; j++)
-      {
-        file << x_cord[i * cols + j] << "," << y_cord[i * cols + j] << "," << data[i * cols + j] << std::endl;
-      }
+      RealNumber* pixel = static_cast< RealNumber* >( image -> GetScalarPointer( i, j, 0 ));
+      pixel[0] = data[ i*cols + j ];
     }
   }
-  file.close();
+  vtkSmartPointer<vtkXMLImageDataWriter> writer = vtkSmartPointer<vtkXMLImageDataWriter>::New();
+  writer -> SetFileName( file_name.c_str());
+  writer -> SetInputData( image );
+  writer -> Write();
 }
 
 // ------------------numerical schemes-----------------------------

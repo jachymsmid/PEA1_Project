@@ -53,7 +53,7 @@ int main()
   InitialConditions<My_Initial_Conditions >(mesh);
   std::cout << "Imposing initial conditions..." << std::endl;
 
-  mesh.write_data("sim/output_t_0.00000.csv");
+  mesh.write_data("sim/output_t_0.00000.vti");
 
   // std::cout << "Enter simulation name (folder with the same name will be created): ";
   // std::cin << sim_name;
@@ -67,7 +67,7 @@ int main()
 
     // this is kinda awkward
     std::ostringstream fn;
-    fn << "sim/output_t_" << std::fixed << std::setprecision(5) << t << ".csv";
+    fn << "sim/output_t_" << std::fixed << std::setprecision(5) << t << ".vti";
     file_name = fn.str();
 
     mesh.write_data(file_name);
