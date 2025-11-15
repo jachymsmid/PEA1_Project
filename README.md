@@ -80,7 +80,7 @@ SimulationInfo sim_info( ... );
 Mesh mesh( sim_info );
 NumericalSolver< Upwind >( mesh, sim_info );
 ```
-There are three numerical schemes available: `Lax_Wendroff, Lax_Friedrichs, Upwind`
+There are three numerical schemes available: `Lax_Wendroff`, `Lax_Friedrichs`, `Upwind`
 
 ### 1. Lax-Friedrichs scheme
 
@@ -96,6 +96,13 @@ $$dt \leq \frac{1}{\frac{1}{dx}+\frac{1}{2x_m dx}}$$,
 where $x_m = \max |x|\quad x \in \Omega$.
 
 ### 3. Upwind scheme
+
+## CFl
+CFL is a templated function that computes maximal time step from the used numerical scheme.
+```
+float dt = CFL< Lax_Wendroff>( float dx, float dy );
+```
+Note that time step dt is needed for the SimulationStruct initialization.
 
 ## InitialConditions
 InitialConditions is a templated function that applays specified initial conditions to the data stored in Mesh.
