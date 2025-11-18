@@ -106,6 +106,7 @@ void Mesh::construct_regular_grid( SimulationInfo sim_info )
   std::cout << "Regular grid constructed..." << std::endl;
 }
 
+// dont ask me, written by chatGPT
 void Mesh::write_data( std::string file_name )
 {
   vtkSmartPointer< vtkImageData > image = vtkSmartPointer< vtkImageData >::New();
