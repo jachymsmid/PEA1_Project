@@ -26,6 +26,8 @@
 //        - [ ] VTK library for data storage and visualization
 //        - [ ] error handling
 //        - [ ] generalize the schemes?
+// DONE:
+//
 
 using NumericalScheme = Lax_Wendroff;
 
