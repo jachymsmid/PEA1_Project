@@ -3,30 +3,6 @@
 #include <sstream>
 #include "functions.h"
 
-// TODO:  - [ ] better mesh representation
-//            - [x] change the array of structer paradigm to structure of array
-//                - [ ] how to acces the data?
-//            - [x] copy constructor
-//            - [x] implement flattened arrays 
-//               - [x] maybe Z-curves?
-//                  - [ ] conditions for Z-curves usage
-//            - [ ] irregular grid method - too elaborate?
-//        - [ ] upwind method
-//        - [x] lax-friedrichs method
-//        - [ ] lax-wendroff method
-//            - [ ] calculate the spatial step in the function - preparation for irregular grid
-//            - [ ] clearer and simpler code
-//        - [x] SimulationInfo struct
-//            - [x] constructor - is it working??
-//        - [x] how to implement the numerical solver
-//            - [x] using the function template
-//            - [o] using a pointer to a function
-//        - [x] how to implement boundary/initial conditions?
-//            - [x] again function templates
-//        - [ ] VTK library for data storage and visualization
-//        - [ ] error handling
-//        - [ ] generalize the schemes?
-// DONE:
 //
 
 using NumericalScheme = Lax_Wendroff;
