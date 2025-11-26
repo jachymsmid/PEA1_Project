@@ -20,3 +20,9 @@ struct Zeros
     }
   }
 };
+
+template < class RealNumber, class initialConditions >
+void InitialConditions( Mesh< RealNumber > &mesh )
+{
+  initialConditions::impose( mesh );
+}
