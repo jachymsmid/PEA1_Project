@@ -1,3 +1,5 @@
+#pragma once
+
 #include "GeneralVector.hpp"
 #include <string>
 #include <vector>
