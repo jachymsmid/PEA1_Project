@@ -1,4 +1,3 @@
-#include "functions.h"
 #include <iostream>
 #include <fstream>
 #include <cmath>
@@ -9,46 +8,17 @@
 
 // SimulationInfo
 
-SimulationInfo::SimulationInfo(
-                  const RealNumber step_t,
-                  const RealNumber step_x,
-                  const RealNumber step_y,
-                  const RealNumber x_min,
-                  const RealNumber y_min,
-                  const RealNumber x_max,
-                  const RealNumber y_max,
-                  const int number_x,
-                  const int number_y)
-                : step_t(step_t),
-                  step_x(step_x),
-                  step_y(step_y),
-                  x_min(x_min),
-                  y_min(y_min),
-                  x_max(x_max),
-                  y_max(y_max),
-                  number_x(number_x),
-                  number_y(number_y)
-  {
-    std::cout << "Simulation info initialization..." << std::endl;
-  }
 
 // Mesh
 
 Mesh::Mesh( SimulationInfo sim_info )
-        : data(sim_info.number_x * sim_info.number_y),
-          x_cord(sim_info.number_x * sim_info.number_y),
-          y_cord(sim_info.number_x * sim_info.number_y),
-          rows(sim_info.number_x), cols(sim_info.number_y)
+       
 {
   std::cout << "Mesh initialization..." << std::endl;
 }
 
 Mesh::Mesh( const Mesh &mesh )
-        : data(mesh.data),
-          x_cord(mesh.x_cord),
-          y_cord(mesh.y_cord),
-          rows(mesh.rows),
-          cols(mesh.cols) {}
+        
 
 RealNumber& Mesh::value_ref( size_t i, size_t j )
 {
@@ -57,7 +27,6 @@ RealNumber& Mesh::value_ref( size_t i, size_t j )
       throw std::out_of_range("Index out of bounds");
     }
 
-    return data[i * cols + j];
 }
 
 const RealNumber& Mesh::value( size_t i,size_t j ) const

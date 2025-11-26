@@ -1,7 +1,6 @@
 #include <iostream>
 #include <iomanip>
 #include <sstream>
-#include "functions.h"
 
 // TODO:  - [ ] better mesh representation
 //            - [x] change the array of structer paradigm to structure of array
