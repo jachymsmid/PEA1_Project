@@ -21,8 +21,8 @@ struct Zeros
   }
 };
 
-template < class RealNumber, class boundaryConditions >
+template < class RealNumber, template< class > class boundaryConditions >
 void BoundaryConditions( Mesh< RealNumber > &mesh )
 {
-  boundaryConditions::impose( mesh );
+  boundaryConditions< RealNumber >::impose( mesh );
 }

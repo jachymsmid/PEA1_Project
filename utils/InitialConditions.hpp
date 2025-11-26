@@ -19,8 +19,8 @@ void impose( Mesh< RealNumber > &mesh )
 };
 
 
-template < class RealNumber, class initialConditions >
+template < class RealNumber, template< class > class initialConditions >
 void InitialConditions( Mesh< RealNumber > &mesh )
 {
-  initialConditions::impose( mesh );
+  initialConditions< RealNumber >::impose( mesh );
 }
