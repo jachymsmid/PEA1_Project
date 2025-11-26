@@ -1,6 +1,8 @@
 #include "GeneralVector.hpp"
 #include <string>
 #include <vector>
+#include <fstream>
+#include <iostream>
 #include "SimulationInfo.hpp"
 
 
@@ -48,6 +50,39 @@ public:
     }
   }
 
-  void write_data( std::string file_name );
+  void write_data( std::string file_name )
+  {
+    const int pocPoli = 1; //<------------------ TADY
+
+    int pocBunek = (cols)*(rows);
+
+    std::ofstream file;
+    file.open( file_name );
+
+    file << "# vtk DataFile Version 3.0" << std::endl;
+    file << "vtk output" << std::endl;
+    file << "ASCII" << std::endl;
+    file << "DATASET STRUCTURED_GRID" << std::endl;
+    // why are dimensions cols + 1 ??
+    file << "DIMENSIONS "<< cols + 1 << " " << rows + 1 << " 1" << std::endl;
+    file << "POINTS " << ( cols + 1 )*( rows + 1) << " float" << std::endl;
+
+    for( size_t i=0; i < cols + 1; i++)
+      for(float j=0; j < rows + 1; j++)
+        file << x_cord[i] << " " << y_cord[j] << " 0" << std::endl;
+
+    file << "CELL_DATA " << pocBunek << std::endl;
+    file << "FIELD FieldData " << pocPoli << std::endl;
+
+    for ( size_t k = 0; k < pocPoli; k++ )
+    {
+      file << "value " << k << pocBunek << " float" << std::endl;
+      for( size_t i = 0; i < cols; i++)
+        for( size_t j = 0; j < rows; j++)
+            file << data[i*cols+j] << std::endl;
+    }
+
+    file.close();
+  }
 
 };
