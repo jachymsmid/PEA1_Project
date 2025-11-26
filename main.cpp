@@ -1,20 +1,25 @@
 #include <iostream>
 #include <iomanip>
 #include <sstream>
+#include "utils/Mesh.hpp"
+#include "utils/SimulationInfo.hpp"
+#include "utils/NumericalSchemes.hpp"
+#include "utils/InitialConditions.hpp"
+#include "utils/BoundaryConditions.hpp"
 
-// TODO:  - [ ] better mesh representation
+// TODO:  - [x] better mesh representation
 //            - [x] change the array of structer paradigm to structure of array
-//                - [ ] how to acces the data?
+//                - [x] how to acces the data?
 //            - [x] copy constructor
 //            - [x] implement flattened arrays 
-//               - [x] maybe Z-curves?
-//                  - [ ] conditions for Z-curves usage
-//            - [ ] irregular grid method - too elaborate?
-//        - [ ] upwind method
+//               - [o] maybe Z-curves?
+//                  - [o] conditions for Z-curves usage
+//        - [ ] irregular grid method - too elaborate?
+//        - [x] upwind method
 //        - [x] lax-friedrichs method
-//        - [ ] lax-wendroff method
+//        - [x] lax-wendroff method
 //            - [ ] calculate the spatial step in the function - preparation for irregular grid
-//            - [ ] clearer and simpler code
+//            - [x] clearer and simpler code
 //        - [x] SimulationInfo struct
 //            - [x] constructor - is it working??
 //        - [x] how to implement the numerical solver
@@ -22,11 +27,12 @@
 //            - [o] using a pointer to a function
 //        - [x] how to implement boundary/initial conditions?
 //            - [x] again function templates
-//        - [ ] VTK library for data storage and visualization
-//        - [ ] error handling
-//        - [ ] generalize the schemes?
+//        - [x] VTK library for data storage and visualization
+//        - [o] error handling
+//        - [o] generalize the schemes?
 
-using NumericalScheme = Lax_Wendroff;
+using RealNumber = float;
+using NumericalScheme = Lax_Wendroff< RealNumber >;
 
 int main()
 {
@@ -38,31 +44,27 @@ int main()
   const RealNumber T = 2.f;
   RealNumber t = 0.f;
   const std::string sim_name;
-  RealNumber dt = CFL< NumericalScheme>(dx, dy);
+  RealNumber dt = CFL< RealNumber, NumericalScheme >(dx, dy);
 
-  SimulationInfo sim_info(dt, dx, dy, x_min, y_min, x_max, y_max, N_x, N_y);
+  SimulationInfo< RealNumber > sim_info(dt, dx, dy, x_min, y_min, x_max, y_max, N_x, N_y);
   
 
   // initialize the mesh, U and file_name
-  Mesh mesh(sim_info); 
+  Mesh< RealNumber > mesh(sim_info); 
   std::string file_name;
 
   mesh.construct_regular_grid(sim_info);
 
-  InitialConditions<My_Initial_Conditions >(mesh);
-  std::cout << "Imposing initial conditions..." << std::endl;
+  InitialConditions< RealNumber, MyInitialConditions >(mesh);
 
   mesh.write_data("sim/output_t_0.00000.vti");
-
-  // std::cout << "Enter simulation name (folder with the same name will be created): ";
-  // std::cin << sim_name;
 
   // main loop
   while (t <= T)
   {
     t += dt;
-    NumericalSolver< NumericalScheme >(mesh, sim_info);
-    BoundaryConditions< Zeros >(mesh);
+    NumericalSolver< RealNumber, NumericalScheme >(mesh, sim_info);
+    BoundaryConditions< RealNumber, Zeros >(mesh);
 
     // this is kinda awkward
     std::ostringstream fn;
