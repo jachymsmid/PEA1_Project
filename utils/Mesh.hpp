@@ -43,10 +43,16 @@ public:
   size_t getCols() const { return cols; }
   size_t getRows() const { return rows; }
 
+
   void construct_regular_grid( SimulationInfo< RealNumber > sim_info )
   {
-    for ( size_t i = 0; i < rows * cols; i++)
+    for (size_t i = 0; i < rows; ++i)
     {
+      for (size_t j = 0; j < cols; ++j)
+      {
+          x_cord[i * cols + j] = sim_info.x_min + i * sim_info.step_x;
+          y_cord[i * cols + j] = sim_info.y_min + j * sim_info.step_y;
+      }
     }
   }
 
