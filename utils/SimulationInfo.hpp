@@ -12,6 +12,8 @@ struct SimulationInfo
   const RealNumber y_max;
   const int number_x;
   const int number_y;
+  const RealNumber x_speed;
+  const RealNumber y_speed;
 
   SimulationInfo( RealNumber step_t,
                   RealNumber step_x,
@@ -30,5 +32,7 @@ struct SimulationInfo
                   x_max(x_max),
                   y_max(y_max),
                   number_x(number_x),
-                  number_y(number_y) {}
+                  number_y(number_y),
+                  x_speed(x_speed),
+                  y_speed(y_speed) {}
 };
