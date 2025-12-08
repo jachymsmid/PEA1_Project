@@ -35,7 +35,7 @@ using RealNumber = float;
 using NumericalScheme_ = Lax_Wendroff< RealNumber >;
 using Mesh_ = Mesh< RealNumber >;
 using InitialConditions_ = MyInitialConditions< RealNumber, Mesh_ >;
-using BoundaryConditions_ = Zeros< RealNumber >;
+using BoundaryConditions_ = Zeros< RealNumber, Mesh_ >;
 
 int main()
 {
@@ -46,10 +46,11 @@ int main()
   const RealNumber dx = (x_max-x_min) / N_x, dy = (y_max-y_min) / N_y;
   const RealNumber T = 2.f;
   RealNumber t = 0.f;
+  const RealNumber y_speed =  1.0, x_speed = 1.0;
   const std::string sim_name;
   RealNumber dt = CFL< RealNumber, NumericalScheme_ >(dx, dy);
 
-  SimulationInfo< RealNumber > sim_info(dt, dx, dy, x_min, y_min, x_max, y_max, N_x, N_y);
+  SimulationInfo< RealNumber > sim_info(dt, dx, dy, x_min, y_min, x_max, y_max, N_x, N_y, x_speed, y_speed);
   
 
   // initialize the mesh, U and file_name
@@ -58,7 +59,7 @@ int main()
 
   mesh.construct_regular_grid( sim_info );
 
-  InitialConditions< InitialConditions_, Mesh_ >( mesh );
+  InitialConditions< Mesh_, InitialConditions_ >( mesh );
 
   mesh.write_data( "sim/output_t_0.00000.vti" );
 
@@ -67,7 +68,7 @@ int main()
   {
     t += dt;
     NumericalSolver< RealNumber, NumericalScheme_ >( mesh, sim_info );
-    BoundaryConditions< RealNumber, BoundaryConditions_ >( mesh );
+    BoundaryConditions< Mesh_, BoundaryConditions_ >( mesh );
 
     // this is kinda awkward
     std::ostringstream fn;
