@@ -1,12 +1,11 @@
 #pragma once
 
-#include "Mesh.hpp"
 #include <cmath>
 
-template < class RealNumber >
+template < class RealNumber, class Mesh >
 struct MyInitialConditions
 {
-void impose( Mesh< RealNumber > &mesh )
+  void impose( Mesh &mesh )
   {
     for (size_t i = 0; i < mesh.getRows(); i++)
     {
@@ -19,8 +18,8 @@ void impose( Mesh< RealNumber > &mesh )
 };
 
 
-template < class RealNumber, template< class > class initialConditions >
-void InitialConditions( Mesh< RealNumber > &mesh )
+template < class initialConditions, class Mesh >
+void InitialConditions( Mesh &mesh )
 {
-  initialConditions< RealNumber >::impose( mesh );
+  initialConditions::impose( mesh );
 }

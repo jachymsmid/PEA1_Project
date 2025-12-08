@@ -117,5 +117,5 @@ void NumericalSolver( Mesh<RealNumber > &mesh, SimulationInfo< RealNumber > sim_
 template < class RealNumber, class Scheme >
 RealNumber CFL( RealNumber dx, RealNumber dy )
 {
-  Scheme::cfl( dx, dy );
+  return Scheme::cfl( dx, dy );
 }

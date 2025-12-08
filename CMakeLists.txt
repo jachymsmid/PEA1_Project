@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 
 # define sources
-set(SOURCES main.cpp utils/*.hpp )
+set(SOURCES main.cpp utils/ )
 # Create executable
 add_executable(advection ${SOURCES})
 

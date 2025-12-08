@@ -32,7 +32,9 @@
 //        - [o] generalize the schemes?
 
 using RealNumber = float;
-using NumericalScheme = Lax_Wendroff< RealNumber >;
+using NumericalScheme_ = Lax_Wendroff< RealNumber >;
+using Mesh_ = Mesh< RealNumber >;
+using InitialConditions_ = MyInitialConditions< RealNumber, Mesh_ >;
 
 int main()
 {
@@ -44,18 +46,18 @@ int main()
   const RealNumber T = 2.f;
   RealNumber t = 0.f;
   const std::string sim_name;
-  RealNumber dt = CFL< RealNumber, NumericalScheme >(dx, dy);
+  RealNumber dt = CFL< RealNumber, NumericalScheme_ >(dx, dy);
 
   SimulationInfo< RealNumber > sim_info(dt, dx, dy, x_min, y_min, x_max, y_max, N_x, N_y);
   
 
   // initialize the mesh, U and file_name
-  Mesh< RealNumber > mesh(sim_info); 
+  Mesh_ mesh(sim_info); 
   std::string file_name;
 
   mesh.construct_regular_grid(sim_info);
 
-  InitialConditions< RealNumber, MyInitialConditions >(mesh);
+  InitialConditions< InitialConditions_, Mesh_ >( mesh );
 
   mesh.write_data("sim/output_t_0.00000.vti");
 
@@ -63,7 +65,7 @@ int main()
   while (t <= T)
   {
     t += dt;
-    NumericalSolver< RealNumber, NumericalScheme >(mesh, sim_info);
+    NumericalSolver< RealNumber, NumericalScheme_ >(mesh, sim_info);
     BoundaryConditions< RealNumber, Zeros >(mesh);
 
     // this is kinda awkward
