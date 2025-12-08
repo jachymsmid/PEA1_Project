@@ -1,11 +1,11 @@
 #pragma once
 
-#include "Mesh.hpp"
+#include <cstddef>
 
-template < class RealNumber >
+template < class RealNumber, class Mesh >
 struct Zeros
 {
-  void impose( Mesh< RealNumber > &mesh )
+  static void impose( Mesh &mesh )
   {
     for (size_t i = 0; i < mesh.getRows(); ++i)
     {
@@ -21,8 +21,8 @@ struct Zeros
   }
 };
 
-template < class RealNumber, template< class > class boundaryConditions >
-void BoundaryConditions( Mesh< RealNumber > &mesh )
+template < class Mesh, class boundaryConditions >
+void BoundaryConditions( Mesh &mesh )
 {
-  boundaryConditions< RealNumber >::impose( mesh );
+  boundaryConditions::impose( mesh );
 }

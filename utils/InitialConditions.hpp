@@ -5,7 +5,7 @@
 template < class RealNumber, class Mesh >
 struct MyInitialConditions
 {
-  void impose( Mesh &mesh )
+  static void impose( Mesh &mesh )
   {
     for (size_t i = 0; i < mesh.getRows(); i++)
     {
@@ -18,7 +18,7 @@ struct MyInitialConditions
 };
 
 
-template < class initialConditions, class Mesh >
+template < class Mesh, class initialConditions >
 void InitialConditions( Mesh &mesh )
 {
   initialConditions::impose( mesh );
