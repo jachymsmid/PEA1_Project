@@ -1,5 +1,4 @@
 #pragma once
-
 template < class RealNumber >
 struct SimulationInfo
 {
@@ -23,7 +22,9 @@ struct SimulationInfo
                   RealNumber x_max,
                   RealNumber y_max,
                   int number_x,
-                  int number_y)
+                  int number_y,
+                  RealNumber x_speed,
+                  RealNumber y_speed)
                 : step_t(step_t),
                   step_x(step_x),
                   step_y(step_y),
