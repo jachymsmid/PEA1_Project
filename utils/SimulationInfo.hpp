@@ -2,7 +2,7 @@
 template < class RealNumber >
 struct SimulationInfo
 {
-  const RealNumber step_t;
+  RealNumber step_t;
   const RealNumber step_x;
   const RealNumber step_y;
   const RealNumber x_min;

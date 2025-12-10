@@ -48,16 +48,16 @@ int main()
   RealNumber t = 0.f;
   const RealNumber y_speed =  1.0, x_speed = 1.0;
   const std::string sim_name;
-  RealNumber dt = CFL< RealNumber, NumericalScheme_ >(dx, dy);
 
-  SimulationInfo< RealNumber > sim_info(dt, dx, dy, x_min, y_min, x_max, y_max, N_x, N_y, x_speed, y_speed);
+  SimulationInfo< RealNumber > sim_info(0.f, dx, dy, x_min, y_min, x_max, y_max, N_x, N_y, x_speed, y_speed);
   
-
-  // initialize the mesh, U and file_name
+  // initialize the mesh
   Mesh_ mesh( sim_info ); 
-  std::string file_name;
-
   mesh.construct_regular_grid( sim_info );
+
+  std::string file_name;
+  RealNumber dt = CFL< RealNumber, NumericalScheme_>(mesh, sim_info);
+  sim_info.step_t = dt;
 
   InitialConditions< Mesh_, InitialConditions_ >( mesh );
 
