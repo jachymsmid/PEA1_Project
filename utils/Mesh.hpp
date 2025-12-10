@@ -18,6 +18,19 @@ private:
   std::vector< RealNumber > y_cord;
   std::size_t rows, cols;
 
+
+  inline void check_bounds(size_t i, size_t j) const
+{
+    if (i >= rows || j >= cols)
+    {
+        std::cerr << "Mesh index out of bounds! (i=" << i
+                  << ", j=" << j << ", rows=" << rows
+                  << ", cols=" << cols << ")\n";
+        std::exit(1);
+    }
+}
+
+
 public:
 
   Mesh( SimulationInfo< RealNumber > sim_info )
@@ -34,13 +47,29 @@ public:
       rows(mesh.rows),
       cols(mesh.cols) {}
 
-  RealNumber &value_ref( std::size_t i, std::size_t j ) { return data[i * cols + j]; }
+  RealNumber &value_ref( std::size_t i, std::size_t j ) 
+  { 
+    check_bounds(i,j);
+    return data[i * cols + j]; 
+  }
 
-  const RealNumber &value( size_t i, size_t j ) const { return data[i*cols + j]; }
+  const RealNumber &value( size_t i, size_t j ) const 
+  { 
+    check_bounds(i,j);
+    return data[i*cols + j]; 
+  }
 
-  const RealNumber &x( size_t i, size_t j ) const { return x_cord[i*cols + j]; }
+  const RealNumber &x( size_t i, size_t j ) const 
+  {
+    check_bounds(i,j);
+    return x_cord[i*cols + j]; 
+  }
 
-  const RealNumber &y( size_t i, size_t j ) const { return y_cord[i*cols + j]; }
+  const RealNumber &y( size_t i, size_t j ) const 
+  {
+    check_bounds(i,j);
+    return y_cord[i*cols + j]; 
+  }
 
   size_t getCols() const { return cols; }
   size_t getRows() const { return rows; }
